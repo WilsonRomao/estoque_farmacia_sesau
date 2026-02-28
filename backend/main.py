@@ -3,6 +3,8 @@ from flask import request, jsonify
 from config import app,db
 from models import Medicamento
 
+import os
+
 @app.route("/medicamento", methods=["GET"])
 def get_medicamento():
     medicamento = Medicamento.query.all()
@@ -43,8 +45,6 @@ def create_medicamento():
         }
     ),201
     
-
-
 @app.route("/update_medicamento/<string:codigo_medicamento>", methods=["PATCH"])
 def update_content(codigo_medicamento):
     medicamento = Medicamento.query.get(codigo_medicamento)
@@ -86,6 +86,29 @@ def delete_medicamento(codigo_medicamento):
     return jsonify({
         "message": "Medicamento deletado"
     })
+
+@app.route("/upload", methods=["POST"])
+def upload():
+    # 1. Verifica se o arquivo está na requisição
+    if 'file' not in request.files:
+        return jsonify({"message": "Nenhum arquivo enviado"}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"message": "Arquivo sem nome"}), 400
+
+    # 2. Garante que a pasta existe (evita erro de 'Directory not found')
+    upload_path = "uploads" # Recomendo usar um nome no plural
+    if not os.path.exists(upload_path):
+        os.makedirs(upload_path)
+
+    # 3. Salva o arquivo
+    file.save(os.path.join(upload_path, file.filename))
+
+    # 4. Retorna JSON em vez de Redirect
+    # O React vai ler essa mensagem e mostrar o alert()
+    return jsonify({"message": "Arquivo enviado com sucesso!"}), 201
 
 
 #To run the aplication:
