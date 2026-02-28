@@ -1,9 +1,11 @@
 import { useState,useEffect } from 'react'
 import MedicamentoList from './MedicamentoList' 
+import MedicamentoForm from './MedicamentoForm'
 import './App.css'
 
 function App() {
   const [Medicamento, setMedicamento] = useState([])
+  
 
   useEffect(() => {
     fetchMedicamento()
@@ -16,7 +18,10 @@ function App() {
     console.log(data.Medicamento)
   }
 
-  return <MedicamentoList Medicamento={Medicamento}/>
+  return <>
+    <MedicamentoList Medicamento={Medicamento}/>
+    <MedicamentoForm/>
+  </>
 }
 
 export default App

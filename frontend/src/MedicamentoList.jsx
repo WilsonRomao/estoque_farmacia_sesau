@@ -16,12 +16,13 @@ const MedicamentoList = ({Medicamento}) => {
             </thead>
 
             <tbody>
-                {Medicamento.map((Medicamento) => (
-                    <tr key={Medicamento.codigo_medicamento}>
-                        <td>{Medicamento.nome_medicamento}</td>
-                        <td>{Medicamento.quantidade}</td>
+                {Medicamento.map((item) => (
+                    <tr key={item.codigoMedicamento}>
+                        <td>{item.codigoMedicamento}</td>
+                        <td>{item.nomeMedicamento}</td>
+                        <td>{item.quantidade}</td>
                         <td> 
-                            <button>Update</button>
+                            <button onClick={''} >Update</button>
                             <button>Delete</button>
                         </td>
                     </tr>
