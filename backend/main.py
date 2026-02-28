@@ -2,6 +2,7 @@
 from flask import request, jsonify
 from config import app,db
 from models import Medicamento
+from pipeline import processData
 
 import os
 
@@ -16,6 +17,7 @@ def create_medicamento():
     codigo_medicamento = request.json.get("codigoMedicamento")
     nome_medicamento = request.json.get("nomeMedicamento")
     quantidade = request.json.get("quantidade")
+    estabelecimento_de_saude = request.json.get("estabelecimentoSaude")
 
 
     if not codigo_medicamento or not nome_medicamento or not quantidade:
@@ -26,7 +28,8 @@ def create_medicamento():
     novo_medicamento = Medicamento(
         codigo_medicamento=codigo_medicamento,
         nome_medicamento=nome_medicamento,
-        quantidade=quantidade
+        quantidade=quantidade,
+        estabelecimento_de_saude = estabelecimento_de_saude
     )
 
     try: 
@@ -87,28 +90,43 @@ def delete_medicamento(codigo_medicamento):
         "message": "Medicamento deletado"
     })
 
+import os
+from flask import request, jsonify
+
 @app.route("/upload", methods=["POST"])
 def upload():
-    # 1. Verifica se o arquivo está na requisição
+    # 1. Validação do arquivo
     if 'file' not in request.files:
         return jsonify({"message": "Nenhum arquivo enviado"}), 400
 
     file = request.files['file']
-
     if file.filename == '':
         return jsonify({"message": "Arquivo sem nome"}), 400
 
-    # 2. Garante que a pasta existe (evita erro de 'Directory not found')
-    upload_path = "uploads" # Recomendo usar um nome no plural
+    # 2. Caminhos (backend/uploads)
+    upload_path = os.path.join("uploads")
     if not os.path.exists(upload_path):
         os.makedirs(upload_path)
 
-    # 3. Salva o arquivo
-    file.save(os.path.join(upload_path, file.filename))
+    file_path = os.path.join(upload_path, file.filename)
+    file.save(file_path)
 
-    # 4. Retorna JSON em vez de Redirect
-    # O React vai ler essa mensagem e mostrar o alert()
-    return jsonify({"message": "Arquivo enviado com sucesso!"}), 201
+    try:
+        # 3. O Pipeline aciona o Banco de Dados
+        # Passe o caminho completo do arquivo para o seu processador
+        processData(fileName=file_path) 
+
+        # 4. Retorno de sucesso para o React
+        # O React receberá esse 201 e saberá que os dados já estão no banco
+        return jsonify({
+            "message": "Arquivo processado e dados salvos no banco com sucesso!"
+        }), 201
+
+    except Exception as e:
+        # Se o banco de dados falhar, o erro cai aqui
+        print(f"Erro no pipeline: {e}")
+        return jsonify({"message": f"Erro ao salvar no banco: {str(e)}"}), 500
+
 
 
 #To run the aplication:

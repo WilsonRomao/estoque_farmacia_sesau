@@ -7,6 +7,7 @@ const MedicamentoList = ({Medicamento}) => {
         <table>
             <thead>
                 <tr>
+                    <th>Estabelecimento de Saúde</th>
                     <th>Codigo do Medicamento</th>
                     <th>Nome do Medicamento</th>
                     <th>Quantidade</th>
@@ -18,6 +19,7 @@ const MedicamentoList = ({Medicamento}) => {
             <tbody>
                 {Medicamento.map((item) => (
                     <tr key={item.codigoMedicamento}>
+                        <td>{item.estabelecimentoSaude}</td>
                         <td>{item.codigoMedicamento}</td>
                         <td>{item.nomeMedicamento}</td>
                         <td>{item.quantidade}</td>
