@@ -42,7 +42,10 @@ def processData(fileName):
     medicamentos = pd.merge(medicamentos_df, quantidade_df, left_index=True, right_index=True, how='inner')
 
     medicamentos = medicamentos[['codigo_medicamento','nome_medicamento','quantidade']]
-    medicamentos
+    
+    
+    # verifica se há medicamentos duplicados e soma as quantidades
+    medicamentos = medicamentos.groupby(['codigo_medicamento', 'nome_medicamento'], as_index=False)['quantidade'].sum()
 
     #____Extrai o nome do estabelecimento_______
    # 1. Filtra as linhas que contêm 'Estabelecimento'
@@ -88,7 +91,7 @@ def processData(fileName):
     # Configuração da conexão
     engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     try:
-        medicamentos.to_sql('medicamento', con=db.engine, if_exists='append', index=False)
+        medicamentos.to_sql('medicamento', con=db.engine, if_exists='replace', index=False)
         print("Pipeline finalizado: Dados inseridos no banco.")
     except Exception as e:
         print(f"Erro ao inserir no banco: {e}")
