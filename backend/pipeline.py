@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from sqlalchemy import create_engine
-from config import app
+from config import app ,db
 
 
 BASE_PATH = 'uploads'
@@ -56,12 +56,12 @@ def processData(fileName):
         
         # 3. Extrai o nome do campo (chave) e o valor (nome do local)
         # iloc[0] pega a primeira ocorrência encontrada
-        chave_bruta = split_data.iloc[0, 0]
-        chave = chave_bruta.lower().replace(" ", "_")  # "Estabelecimento"
+        # chave_bruta = split_data.iloc[0, 0]
+        # chave = chave_bruta.lower().replace(" ", "_")  # "Estabelecimento"
         valor = split_data.iloc[0, 1]  # "Farmácia Central" (ou o que vier após o ":")
 
         # 4. Atribui ao seu dataframe de medicamentos
-        medicamentos[chave] = valor
+        medicamentos['estabelecimento_de_saude'] = valor
         
     else:
         print("Nenhum estabelecimento encontrado no dataframe.")
@@ -75,12 +75,12 @@ def processData(fileName):
     #_____SALVA INFORMAÇÕES EM FORMATO JSON NA PASTA DADOS_______
 
    
-    save_path = 'site_achei/backend/dados'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    # save_path = 'site_achei/backend/dados'
+    # if not os.path.exists(save_path):
+    #     os.makedirs(save_path)
     
-    medicamentos.to_json(os.path.join(save_path,'new_data.json'), orient='records')
-    print(quantidade_df)
+    # medicamentos.to_json(os.path.join(save_path,'new_data.json'), orient='records')
+    # print(quantidade_df)
 
 
     #____CARREGA AS INFORMAÇÕES NO BANCO DE DADOS____________
@@ -88,7 +88,7 @@ def processData(fileName):
     # Configuração da conexão
     engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     try:
-        medicamentos.to_sql('medicamentos', con=engine, if_exists='append', index=False)
+        medicamentos.to_sql('medicamento', con=db.engine, if_exists='append', index=False)
         print("Pipeline finalizado: Dados inseridos no banco.")
     except Exception as e:
         print(f"Erro ao inserir no banco: {e}")
